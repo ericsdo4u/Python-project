@@ -1,0 +1,10 @@
+add_In_List = []
+for num in range(1, 50, 5):
+    add_In_List.append(num)
+        print(add_In_List)
+
+        def get_Length_Of_List(number):
+    count = 0
+    for num in add_number_to_List:
+        count += 1
+    return count
