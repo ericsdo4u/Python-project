@@ -1,58 +1,77 @@
-from entry import Entry
+from package_account.account import Account
+from package_account.exception_class import InsufficientFundException
 
 
-class Diary:
-    # global id
+class Dairy:
+    def __init__(self, name):
+        self.account_number = 0
+        self.name = name
+        self.customers_list = []
 
-    def __init__(self, user_name, password):
-        self.number_of_entry = 0
-        self.user_name = user_name
-        self.password = password
-        self.islocked = False
-        self.entries = []
-        self.entry_id = 0
+    def get_name(self):
+        return self.name
 
-    def get_password(self):
-        return self.password
+    def get_account_number(self):
+        self.account_number += 1
+        return self.account_number
 
-    def is_locked(self):
-        return self.islocked
+    def find_account(self, account_number) -> Account:
+        try:
+            for account in self.customers_list:
+                if account.get_account_number1() == account_number:
+                    return account
+                else:
+                    print("Account not found")
+        except BaseException:
+            print("Invalid entry")
+        # raise InvalidAccountNumberException("Account not found")
 
-    def get_id_number(self) -> int:
-        self.entry_id += 1
-        return self.entry_id
+    def check_balance(self, account_number, pin) -> int:
+        try:
+            account_found = self.find_account(account_number)
+            return account_found.get_balance(pin)
+        except InsufficientFundException:
+            print("Insufficient fund")
 
-    def get_number_of_entry(self) -> int:
-        return len(self.entries)
+    def number_of_customer(self) -> int:
+        return len(self.customers_list)
 
-    def create_entry(self, title, body):
-        if self.islocked:
-            raise ValueError("Dairy is locked, unlock diary to create entry")
-        if not self.islocked:
-            entry_id = self.get_id_number()
-            new_entry = Entry(entry_id, title, body)
-            self.entries.append(new_entry)
+    def register_customer(self, first_name, last_name, pin) -> Account:
+        name = first_name + " " + last_name
+        new_account = Account(name, self.get_account_number(), pin)
+        self.customers_list.append(new_account)
+        print("your account number is : ", new_account.get_account_number1())
+        return new_account
 
-    def find_entry_by_id(self, entry_id) -> Entry:
-        for item in self.entries:
-            if item.get_entry_id() == entry_id:
-                return item
+    def deposit_in_bank(self, amount, account_number):
+        try:
+            account_found = self.find_account(account_number)
+            account_found.deposit(amount)
+        except BaseException:
+            print("No Negative value")
 
-    def delete_entry(self, entry_id):
-        for item in self.entries:
-            if item.get_entry_id() == entry_id:
-                self.entries.remove(item)
+    def withdraw_in_bank(self, amount, account_number, pin):
+        amount_withdraw = self.find_account(account_number)
+        amount_withdraw.withdraw(amount, pin)
+        # for account in self.customers_list:
+        #     if account.get_account_number1() == account_number:
+        #         if account.pin == pin:
+        #             withdraw_amount = account.withdraw(amount, pin)
+        #             return withdraw_amount
 
-    def update_entry(self, entry_id, title, body):
-        entry = self.find_entry_by_id(entry_id)
-        for entry1 in self.entries:
-            if entry == entry1:
-                entry1.update_body(body)
-                entry1.update_title(title)
+    def transfer(self, amount, sender_account_number, receiver_account_number, pin):
+        try:
+            sender = self.find_account(sender_account_number)
+            receiver = self.find_account(receiver_account_number)
+            sender.withdraw(amount, pin)
+            receiver.deposit(amount)
+        except ValueError:
+            print("Invalid entry")
 
-    def lock_dairy(self):
-        self.islocked = True
-
-    def unlock_dairy(self, password):
-        if self.get_password() == password:
-            self.islocked = False
+    def remove_account(self, account_number, pin):
+        try:
+            for account in self.customers_list:
+                if account.get_account_number1() == account_number and account.pin == pin:
+                    self.customers_list.remove(account)
+        except ValueError:
+            print("Account not found")
